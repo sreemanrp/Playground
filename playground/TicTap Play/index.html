@@ -46,12 +46,11 @@ body {
   position: fixed;
   top: env(safe-area-inset-top, 16px);
   left: 16px;
-  font-family: GeistMono, monospace;
-  font-size: clamp(22px, 3vw, 30px);
+  font-family: "DM Sans", sans-serif;
+  font-size: clamp(20px, 3vw, 26px);
+  font-style: normal;
   font-weight: 300;
   letter-spacing: -0.3px;
-  -webkit-font-smoothing: antialiased;
-  text-rendering: optimizeLegibility;
 }
 
 .header-right {
@@ -66,10 +65,6 @@ body {
 .header-right a {
   color: var(--text);
   text-decoration: none;
-}
-
-.header-right a:hover {
-  opacity: 0.85;
 }
 
 .wrapper {
@@ -178,18 +173,12 @@ body {
   font-family: GeistMono, monospace;
   font-size: clamp(16px, 2.5vw, 18px);
   font-weight: 400;
-  letter-spacing: -0.2px;
 }
 
 .close {
   width: 24px;
   height: 24px;
   cursor: pointer;
-}
-
-.close svg {
-  width: 100%;
-  height: 100%;
 }
 </style>
 </head>
@@ -237,6 +226,11 @@ let turn = "x"
 let board = Array(9).fill(null)
 let gameOver = false
 
+const players = {
+  x: "Player 1 You Win",
+  dot: "Player 2 You Win"
+}
+
 const wins = [
   [0,1,2],[3,4,5],[6,7,8],
   [0,3,6],[1,4,7],[2,5,8],
@@ -262,12 +256,12 @@ cells.forEach(cell => {
     cell.appendChild(mark)
 
     if (wins.some(w => w.every(i => board[i] === turn))) {
-      endGame("You Win")
+      endGame(players[turn])
       return
     }
 
     if (board.every(v => v !== null)) {
-      endGame("😞 No One Wins")
+      endGame("No One Wins")
       return
     }
 
