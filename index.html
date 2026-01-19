@@ -2,48 +2,389 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="to build something uniquely, and discover the creativity of community.">
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#f2f2f2" />
+  <meta name="description" content="Playground projects showcase" />
   <title>Playground</title>
 
   <style>
-    @font-face {
-      font-family: "GeistMono";
-      src: url("/assets/fonts/geistmono.ttf") format("truetype");
-      font-display: swap;
-    }
-
-    :root {
-      --bg: #f2f2f2;
-      --text: #1c1c1c;
-    }
-
     * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
+      font-family: "Geist Mono", monospace;
     }
 
     body {
+      background: #f2f2f2;
       min-height: 100vh;
-      background: var(--bg);
-      color: var(--text);
-      font-family: GeistMono, monospace;
-      display: grid;
-      place-items: center;
+      color: #1c1c1c;
     }
 
     header {
-      font-size: clamp(24px, 4vw, 40px);
-      font-weight: 300;
-      letter-spacing: -0.5px;
-      -webkit-font-smoothing: antialiased;
-      text-rendering: optimizeLegibility;
+      height: 64px;
+      padding: 0 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .logo {
+      font-size: 14px;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      position: relative;
+    }
+
+    .icon-btn {
+      width: 32px;
+      height: 32px;
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      padding: 0;
+      transition: transform .2s ease, opacity .2s ease;
+    }
+
+    .icon-btn:hover {
+      transform: rotate(89deg);
+      opacity: .8;
+    }
+
+    .menu-trigger-wrap {
+      min-width: 88px;
+      display: flex;
+      justify-content: center;
+    }
+
+    .menu-trigger,
+    .menu-close {
+      height: 32px;
+      width: 88px;
+      border-radius: 999px;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all .2s ease-out;
+    }
+
+    .menu-trigger {
+      background: #1c1c1c;
+      color: #f2f2f2;
+    }
+
+    .menu-trigger:hover {
+      padding-inline: 28px;
+      filter: brightness(1.1);
+    }
+
+    .menu-close {
+      background: #ffc700;
+      display: none;
+    }
+
+    .menu-panel {
+      position: absolute;
+      top: 48px;
+      right: 0;
+      width: 260px;
+      display: none;
+      flex-direction: column;
+      gap: 12px;
+      z-index: 50;
+    }
+
+    .menu-panel.active {
+      display: flex;
+    }
+
+    .menu-item {
+      background: #fff;
+      border-radius: 999px;
+      padding: 14px 18px;
+      cursor: pointer;
+    }
+
+    main {
+      padding: 32px 16px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 24px;
+      max-width: 1400px;
+      margin: auto;
+    }
+
+    @media (max-width: 900px) {
+      .grid { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    @media (max-width: 600px) {
+      .grid { grid-template-columns: 1fr; }
+    }
+
+    .card {
+      height: 300px;
+      background: #e9e9e9;
+      border-radius: 24px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .card.openable {
+      cursor: pointer;
+    }
+
+    .card.coming-soon {
+      cursor: default;
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      font-size: 11px;
+      letter-spacing: .14em;
+      color: #777;
+    }
+
+    .likes {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      color: #484848;
+    }
+
+    .heart {
+      cursor: pointer;
+    }
+
+    .icon-wrapper {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .card-image {
+      width: 140px;
+      height: 140px;
+      object-fit: contain;
+      border-radius: 10px;
+    }
+
+    .card-footer {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 12px;
+      color: #777;
+    }
+
+    .avatar {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      object-fit: cover;
     }
   </style>
 </head>
 
 <body>
-  <header>Playground</header>
+
+<header>
+  <div class="logo">Playground</div>
+
+  <div class="header-actions">
+    <button class="icon-btn" id="musicToggle">
+      <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+        <path d="M1.03777 14.0902C0.390609 15.2812 0.390608 16.7188 1.03777 17.9098L6.86421 28.6322C7.56419 29.9204 8.91278 30.7224 10.3788 30.7224L21.6212 30.7224C23.0872 30.7224 24.4358 29.9204 25.1358 28.6322L30.9622 17.9098C31.6094 16.7188 31.6094 15.2812 30.9622 14.0902L25.1358 3.36776C24.4358 2.07959 23.0872 1.27757 21.6212 1.27757L10.3788 1.27757C8.91278 1.27757 7.56419 2.07959 6.86421 3.36776L1.03777 14.0902Z" fill="#fff"/>
+        <circle cx="7" cy="7" r="6.5" transform="matrix(1 0 0 -1 9 23)" stroke="#1c1c1c"/>
+      </svg>
+    </button>
+
+    <audio id="bgMusic" src="./assets/music/background.mp3" loop></audio>
+
+    <div class="menu-trigger-wrap">
+      <button class="menu-trigger" id="menuTrigger">
+        <svg class="text-icon-primary-inverted" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M23.5 10C23.7761 10 24 9.77614 24 9.5C24 9.22386 23.7761 9 23.5 9H0.5C0.223858 9 0 9.22386 0 9.5C0 9.77614 0.223858 10 0.5 10H23.5ZM23.5 15C23.7761 15 24 14.7761 24 14.5C24 14.2239 23.7761 14 23.5 14H0.5C0.223858 14 0 14.2239 0 14.5C0 14.7761 0.223858 15 0.5 15H23.5Z" fill="currentColor"></path>
+        </svg>
+      </button>
+
+      <button class="menu-close" id="menuClose">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="text-icon-primary dark:text-icon-primary-inverted">
+          <path d="M18.7168 19.4247C18.9119 19.6199 19.2285 19.6197 19.4238 19.4247C19.6191 19.2295 19.6191 18.913 19.4238 18.7177L12.706 11.9999L19.4238 5.28215C19.6191 5.08689 19.6191 4.77038 19.4238 4.57512C19.2285 4.38026 18.9119 4.37999 18.7168 4.57512L11.999 11.2929L5.28219 4.57512C5.08699 4.38007 4.77039 4.38013 4.57516 4.57512C4.37994 4.77033 4.38004 5.08688 4.57516 5.28215L11.292 11.9999L4.57516 18.7177C4.3799 18.913 4.3799 19.2295 4.57516 19.4247C4.77043 19.6199 5.08696 19.62 5.28219 19.4247L11.999 12.7079L18.7168 19.4247Z" fill="currentColor"></path>
+        </svg>
+      </button>
+    </div>
+
+    <div class="menu-panel" id="menuPanel">
+      <div class="menu-item" data-link="https://community.example.com">Community</div>
+      <div class="menu-item" data-link="https://github.com">Github</div>
+      <div class="menu-item" data-link="https://example.com/sreeman">Sreeman</div>
+      <div class="menu-item" data-link="https://example.com/loki">Loki</div>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div class="grid">
+
+    <div class="card openable" data-id="card1" data-link="https://example.com/1">
+      <div class="card-header">
+        <span>TICTAP PLAY</span>
+        <span class="likes">
+          <span class="count">0</span>
+          <svg class="heart" width="16" height="16" viewBox="0 0 16 17">
+            <path d="M12.8 4.4c.9.9.9 2.4 0 3.3L8.9 12.3a1 1 0 0 1-1.6 0L3.2 7.8c-.9-.9-.9-2.4 0-3.3.9-.9 2.4-.9 3.3 0L8 5.9l1.5-1.5c.9-.9 2.4-.9 3.3 0Z" stroke="currentColor" fill="none"/>
+          </svg>
+        </span>
+      </div>
+      <div class="icon-wrapper">
+        <img class="card-image" src="./assets/images/TicTap Play.webp">
+      </div>
+      <div class="card-footer">
+        <img class="avatar" src="https://github.com/sreemanrp.png">
+        <span>Sreeman Reddy</span>
+      </div>
+    </div>
+
+    <div class="card openable" data-id="card2" data-link="https://example.com/2">
+      <div class="card-header">
+        <span>SOLAR CLOCK</span>
+        <span class="likes">
+          <span class="count">0</span>
+          <svg class="heart" width="16" height="16" viewBox="0 0 16 17">
+            <path d="M12.8 4.4c.9.9.9 2.4 0 3.3L8.9 12.3a1 1 0 0 1-1.6 0L3.2 7.8c-.9-.9-.9-2.4 0-3.3.9-.9 2.4-.9 3.3 0L8 5.9l1.5-1.5c.9-.9 2.4-.9 3.3 0Z" stroke="currentColor" fill="none"/>
+          </svg>
+        </span>
+      </div>
+      <div class="icon-wrapper">
+        <img class="card-image" src="./assets/images/Solar Clock.webp">
+      </div>
+      <div class="card-footer">
+        <img class="avatar" src="https://github.com/sreemanrp.png">
+        <span>Sreeman Reddy</span>
+      </div>
+    </div>
+
+    <div class="card openable" data-id="card3" data-link="https://example.com/3">
+      <div class="card-header">
+        <span>COLOURLOGUE</span>
+        <span class="likes">
+          <span class="count">0</span>
+          <svg class="heart" width="16" height="16" viewBox="0 0 16 17">
+            <path d="M12.8 4.4c.9.9.9 2.4 0 3.3L8.9 12.3a1 1 0 0 1-1.6 0L3.2 7.8c-.9-.9-.9-2.4 0-3.3.9-.9 2.4-.9 3.3 0L8 5.9l1.5-1.5c.9-.9 2.4-.9 3.3 0Z" stroke="currentColor" fill="none"/>
+          </svg>
+        </span>
+      </div>
+      <div class="icon-wrapper">
+        <img class="card-image" src="./assets/images/Colourlogue.webp">
+      </div>
+      <div class="card-footer">
+        <img class="avatar" src="https://github.com/sreemanrp.png">
+        <span>Sreeman Reddy</span>
+      </div>
+    </div>
+
+    <div class="card openable" data-id="card4" data-link="https://example.com/4">
+      <div class="card-header">
+        <span>BIG EYES</span>
+        <span class="likes">
+          <span class="count">0</span>
+          <svg class="heart" width="16" height="16" viewBox="0 0 16 17">
+            <path d="M12.8 4.4c.9.9.9 2.4 0 3.3L8.9 12.3a1 1 0 0 1-1.6 0L3.2 7.8c-.9-.9-.9-2.4 0-3.3.9-.9 2.4-.9 3.3 0L8 5.9l1.5-1.5c.9-.9 2.4-.9 3.3 0Z" stroke="currentColor" fill="none"/>
+          </svg>
+        </span>
+      </div>
+      <div class="icon-wrapper">
+        <img class="card-image" src="./assets/images/Big Eyes.webp">
+      </div>
+      <div class="card-footer">
+        <img class="avatar" src="https://github.com/l0kireddy.png">
+        <span>Loki</span>
+      </div>
+    </div>
+
+    <div class="card coming-soon" data-id="card5">
+      <div class="card-header">
+        <span>COMING SOON</span>
+      </div>
+      <div class="icon-wrapper">
+        <img class="card-image" src="./assets/images/Comming Soon.png">
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<script>
+  const menuTrigger = document.getElementById("menuTrigger")
+  const menuClose = document.getElementById("menuClose")
+  const menuPanel = document.getElementById("menuPanel")
+
+  menuTrigger.onclick = () => {
+    menuPanel.classList.add("active")
+    menuTrigger.style.display = "none"
+    menuClose.style.display = "flex"
+  }
+
+  menuClose.onclick = () => {
+    menuPanel.classList.remove("active")
+    menuClose.style.display = "none"
+    menuTrigger.style.display = "flex"
+  }
+
+  document.querySelectorAll(".menu-item").forEach(item => {
+    item.onclick = () => window.open(item.dataset.link, "_blank")
+  })
+
+  document.querySelectorAll(".card").forEach(card => {
+    const id = card.dataset.id
+    const count = card.querySelector(".count")
+    count.textContent = localStorage.getItem(id) || 0
+
+    const heart = card.querySelector(".heart")
+    heart.onclick = e => {
+      e.stopPropagation()
+      const v = Number(localStorage.getItem(id) || 0) + 1
+      localStorage.setItem(id, v)
+      count.textContent = v
+    }
+
+    if (card.dataset.link) {
+      card.onclick = e => {
+        if (e.target.closest(".heart")) return
+        window.open(card.dataset.link, "_blank")
+      }
+    }
+  })
+
+  const btn = document.getElementById("musicToggle")
+  const audio = document.getElementById("bgMusic")
+  let playing = false
+
+  btn.onclick = () => {
+    if (!playing) {
+      audio.play()
+      playing = true
+    } else {
+      audio.pause()
+      audio.currentTime = 0
+      playing = false
+    }
+  }
+</script>
+
 </body>
 </html>
