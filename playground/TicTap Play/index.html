@@ -4,18 +4,12 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="theme-color" content="#f2f2f2">
-<meta name="description" content="TicTap Play – a minimal, modern tic tac toe style game.">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
-<link rel="icon" href="/assets/favicon" sizes="any">
-<link rel="shortcut icon" href="/assets/favicon">
 <title>TicTap Play</title>
 
 <style>
 @font-face {
-    font-family: "GeistMono";
-    src: url("/assets/fonts/geistmono.ttf") format("truetype");
-    font-display: swap;
+  font-family: "GeistMono";
+  src: url("/assets/fonts/geistmono.ttf") format("truetype");
 }
 
 :root {
@@ -26,29 +20,41 @@
   --x-color: #4a4a4a;
   --dot-color: #ff4b3e;
   --overlay: rgba(0,0,0,0.25);
-  --text: rgb(28, 28, 28);
+  --text: #1c1c1c;
+  --modal: #ffffff;
+}
+
+body.dark {
+  --bg: #0f0f0f;
+  --grid-bg: #1a1a1a;
+  --tile: #242424;
+  --tile-selected: #2f2f2f;
+  --x-color: #e6e6e6;
+  --dot-color: #ff4b3e;
+  --overlay: rgba(0,0,0,0.6);
+  --text: #f2f2f2;
+  --modal: #161616;
 }
 
 * {
   box-sizing: border-box;
-  font-family: sans-serif;
-  color: var(--text);
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 body {
   margin: 0;
   min-height: 100vh;
   background: var(--bg);
-  font-weight: 300;
+  color: var(--text);
+  font-family: sans-serif;
 }
 
 .header {
   position: fixed;
-  top: env(safe-area-inset-top, 16px);
+  top: calc(env(safe-area-inset-top, 16px) + 6px);
   left: 16px;
   font-family: "DM Sans", sans-serif;
   font-size: clamp(20px, 3vw, 26px);
-  font-style: normal;
   font-weight: 300;
   letter-spacing: -0.3px;
 }
@@ -57,62 +63,56 @@ body {
   position: fixed;
   top: calc(env(safe-area-inset-top, 16px) + 6px);
   right: 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
   font-family: GeistMono, monospace;
-  font-size: clamp(14px, 2.5vw, 16px);
-  font-weight: 400;
 }
 
 .header-right a {
-  color: var(--text);
   text-decoration: none;
+  color: var(--text);
 }
 
 .wrapper {
   min-height: 100vh;
   display: grid;
   place-items: center;
-  padding: clamp(16px, 4vw, 32px);
 }
 
 .game {
   background: var(--grid-bg);
-  padding: clamp(14px, 2.5vw, 20px);
-  border-radius: clamp(20px, 3vw, 28px);
+  padding: 20px;
+  border-radius: 28px;
 }
 
 .grid {
   display: grid;
-  grid-template-columns: repeat(3, clamp(72px, 9vw, 92px));
-  grid-template-rows: repeat(3, clamp(72px, 9vw, 92px));
-  gap: clamp(12px, 2vw, 16px);
+  grid-template-columns: repeat(3, 92px);
+  grid-template-rows: repeat(3, 92px);
+  gap: 16px;
 }
 
 .cell {
   background: var(--tile);
-  border-radius: clamp(16px, 2.5vw, 20px);
+  border-radius: 20px;
   display: grid;
   place-items: center;
   cursor: pointer;
-  transition: background 0.15s ease, transform 0.08s ease;
 }
 
 .cell.selected {
   background: var(--tile-selected);
-  cursor: default;
 }
 
 .cell.disabled {
   pointer-events: none;
 }
 
-.cell:active {
-  transform: scale(0.96);
-}
-
 .x {
   position: relative;
-  width: clamp(30px, 4vw, 40px);
-  height: clamp(30px, 4vw, 40px);
+  width: 40px;
+  height: 40px;
 }
 
 .x::before,
@@ -120,24 +120,18 @@ body {
   content: "";
   position: absolute;
   width: 100%;
-  height: clamp(4px, 0.8vw, 6px);
+  height: 6px;
   background: var(--x-color);
   top: 50%;
-  left: 0;
   border-radius: 4px;
 }
 
-.x::before {
-  transform: rotate(45deg);
-}
-
-.x::after {
-  transform: rotate(-45deg);
-}
+.x::before { transform: rotate(45deg); }
+.x::after { transform: rotate(-45deg); }
 
 .dot {
-  width: clamp(24px, 3.5vw, 30px);
-  height: clamp(24px, 3.5vw, 30px);
+  width: 30px;
+  height: 30px;
   background: var(--dot-color);
   border-radius: 50%;
 }
@@ -148,7 +142,6 @@ body {
   background: var(--overlay);
   display: none;
   place-items: center;
-  padding: 20px;
 }
 
 .overlay.show {
@@ -156,9 +149,9 @@ body {
 }
 
 .modal {
-  background: #fff;
+  background: var(--modal);
   border-radius: 20px;
-  padding: 20px 22px;
+  padding: 20px;
   width: 100%;
   max-width: 300px;
 }
@@ -171,14 +164,45 @@ body {
 
 .modal-title {
   font-family: GeistMono, monospace;
-  font-size: clamp(16px, 2.5vw, 18px);
-  font-weight: 400;
 }
 
 .close {
-  width: 24px;
-  height: 24px;
   cursor: pointer;
+}
+
+.theme-btn {
+  width: 44px;
+  height: 44px;
+  background: #ffffff;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.25s ease, transform 0.15s ease;
+}
+
+.theme-btn:hover {
+  background: #f2f2f2;
+}
+
+body.dark .theme-btn {
+  background: #1a1a1a;
+}
+
+body.dark .theme-btn:hover {
+  background: #2a2a2a;
+}
+
+.theme-btn svg {
+  width: 18px;
+  height: 18px;
+  color: #1c1c1c;
+}
+
+body.dark .theme-btn svg {
+  color: #f2f2f2;
 }
 </style>
 </head>
@@ -188,7 +212,16 @@ body {
 <div class="header">TicTap Play</div>
 
 <div class="header-right">
-  <a href="https://github.com/sreemanrp/Playground/tree/main/playground/TicTap%20Play" target="_blank" rel="noopener">Source Code</a>
+  <button id="themeToggle" class="theme-btn">
+    <svg viewBox="0 0 16 16" fill="none">
+      <path d="M8 1C4.134 1 1 4.134 1 8C1 11.866 4.134 15 8 15V1Z" fill="currentColor"/>
+      <path d="M8 1C11.866 1 15 4.134 15 8C15 11.866 11.866 15 8 15V1Z" fill="none" stroke="currentColor" stroke-width="1"/>
+    </svg>
+  </button>
+
+  <a href="https://github.com/sreemanrp/Playground/tree/main/playground/TicTap%20Play" target="_blank">
+    Source Code
+  </a>
 </div>
 
 <div class="wrapper">
@@ -211,81 +244,66 @@ body {
   <div class="modal">
     <div class="modal-header">
       <div class="modal-title" id="resultText"></div>
-      <div class="close" id="close">
-        <svg viewBox="0 0 24 24" fill="none" stroke="#555" stroke-width="2" stroke-linecap="round">
-          <line x1="6" y1="6" x2="18" y2="18"/>
-          <line x1="18" y1="6" x2="6" y2="18"/>
-        </svg>
-      </div>
+      <div class="close" id="close">✕</div>
     </div>
   </div>
 </div>
 
 <script>
-let turn = "x"
-let board = Array(9).fill(null)
-let gameOver = false
+let turn="x"
+let board=Array(9).fill(null)
+let gameOver=false
 
-const players = {
-  x: "Player 1 You Win",
-  dot: "Player 2 You Win"
-}
+const players={x:"Player 1 You Win",dot:"Player 2 You Win"}
+const wins=[[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]]
 
-const wins = [
-  [0,1,2],[3,4,5],[6,7,8],
-  [0,3,6],[1,4,7],[2,5,8],
-  [0,4,8],[2,4,6]
-]
+const cells=document.querySelectorAll(".cell")
+const overlay=document.getElementById("overlay")
+const close=document.getElementById("close")
+const resultText=document.getElementById("resultText")
+const toggle=document.getElementById("themeToggle")
 
-const cells = document.querySelectorAll(".cell")
-const overlay = document.getElementById("overlay")
-const close = document.getElementById("close")
-const resultText = document.getElementById("resultText")
-
-cells.forEach(cell => {
-  cell.addEventListener("click", () => {
-    if (gameOver) return
-    const i = cell.dataset.i
-    if (board[i]) return
-
-    board[i] = turn
+cells.forEach(cell=>{
+  cell.onclick=()=>{
+    if(gameOver)return
+    const i=cell.dataset.i
+    if(board[i])return
+    board[i]=turn
     cell.classList.add("selected")
-
-    const mark = document.createElement("div")
-    mark.className = turn === "x" ? "x" : "dot"
+    const mark=document.createElement("div")
+    mark.className=turn==="x"?"x":"dot"
     cell.appendChild(mark)
-
-    if (wins.some(w => w.every(i => board[i] === turn))) {
-      endGame(players[turn])
+    if(wins.some(w=>w.every(i=>board[i]===turn))){
+      gameOver=true
+      resultText.textContent=players[turn]
+      overlay.classList.add("show")
+      cells.forEach(c=>c.classList.add("disabled"))
       return
     }
-
-    if (board.every(v => v !== null)) {
-      endGame("No One Wins")
+    if(board.every(v=>v!==null)){
+      gameOver=true
+      resultText.textContent="No One Wins"
+      overlay.classList.add("show")
       return
     }
-
-    turn = turn === "x" ? "dot" : "x"
-  })
+    turn=turn==="x"?"dot":"x"
+  }
 })
 
-function endGame(text) {
-  gameOver = true
-  resultText.textContent = text
-  overlay.classList.add("show")
-  cells.forEach(c => c.classList.add("disabled"))
+close.onclick=()=>{
+  overlay.classList.remove("show")
+  board=Array(9).fill(null)
+  gameOver=false
+  turn="x"
+  cells.forEach(c=>{
+    c.className="cell"
+    c.innerHTML=""
+  })
 }
 
-close.addEventListener("click", () => {
-  overlay.classList.remove("show")
-  board = Array(9).fill(null)
-  gameOver = false
-  turn = "x"
-  cells.forEach(cell => {
-    cell.className = "cell"
-    cell.innerHTML = ""
-  })
-})
+toggle.onclick=()=>{
+  document.body.classList.toggle("dark")
+}
 </script>
 
 </body>
