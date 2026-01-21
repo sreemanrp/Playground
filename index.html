@@ -297,7 +297,7 @@
       </div>
     </div>
 
-    <div class="card openable" data-id="card4" data-link="https://example.com/4">
+    <div class="card openable" data-id="card4" data-link="./playground/2048/index.html">
       <div class="card-header">
         <span>BIG EYES</span>
         <span class="likes">
@@ -308,14 +308,13 @@
         </span>
       </div>
       <div class="icon-wrapper">
-        <img class="card-image" src="./assets/images/Big Eyes.webp">
+        <img class="card-image" src="./assets/images/Big Eyes.webp" alt="Card Image">
       </div>
       <div class="card-footer">
-        <img class="avatar" src="https://github.com/l0kireddy.png">
+        <img class="avatar" src="https://github.com/l0kireddy.png" alt="Avatar">
         <span>Loki</span>
       </div>
     </div>
-
     <div class="card coming-soon" data-id="card5">
       <div class="card-header">
         <span>COMING SOON</span>
@@ -352,14 +351,16 @@
   document.querySelectorAll(".card").forEach(card => {
     const id = card.dataset.id
     const count = card.querySelector(".count")
-    count.textContent = localStorage.getItem(id) || 0
+    if(count) count.textContent = localStorage.getItem(id) || 0
 
     const heart = card.querySelector(".heart")
-    heart.onclick = e => {
-      e.stopPropagation()
-      const v = Number(localStorage.getItem(id) || 0) + 1
-      localStorage.setItem(id, v)
-      count.textContent = v
+    if (heart) {
+        heart.onclick = e => {
+        e.stopPropagation()
+        const v = Number(localStorage.getItem(id) || 0) + 1
+        localStorage.setItem(id, v)
+        count.textContent = v
+        }
     }
 
     if (card.dataset.link) {
