@@ -5,414 +5,306 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
   <title>2048 | Playground</title>
   <style>
-    /* --- THEME & RESET --- */
+    :root {
+      --bg: #f2f2f2;
+      --text: #1c1c1c;
+      --card-bg: #e9e9e9;
+      --tile-empty: #d4d4d4;
+      --accent: #ffc700;
+    }
+
+    [data-theme="dark"] {
+      --bg: #121212;
+      --text: #f2f2f2;
+      --card-bg: #1c1c1c;
+      --tile-empty: #2a2a2a;
+    }
+
     * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
-      font-family: "Geist Mono", "Courier New", monospace;
-      -webkit-tap-highlight-color: transparent;
+      font-family: "Geist Mono", monospace;
     }
 
     body {
-      background: #f2f2f2;
-      color: #1c1c1c;
+      background: var(--bg);
+      color: var(--text);
       min-height: 100vh;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
+      transition: background 0.3s ease;
+      overflow: hidden;
+      touch-action: none; /* Prevents browser pull-to-refresh */
     }
 
-    /* --- HEADER --- */
     header {
       width: 100%;
-      max-width: 500px;
-      padding: 20px;
+      max-width: 340px;
+      padding: 20px 0;
       display: flex;
       justify-content: space-between;
       align-items: center;
     }
 
-    .back-btn {
-      text-decoration: none;
-      color: #777;
-      font-size: 14px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      transition: color 0.2s;
-    }
+    .back-btn { text-decoration: none; color: var(--text); font-size: 14px; opacity: 0.7; }
 
-    .back-btn:hover {
-      color: #1c1c1c;
-    }
-
-    .score-box {
-      background: #1c1c1c;
-      color: #fff;
-      padding: 8px 16px;
+    .theme-toggle {
+      background: var(--text);
+      color: var(--bg);
+      border: none;
+      padding: 6px 12px;
       border-radius: 999px;
-      font-size: 14px;
-    }
-
-    .score-label {
-      color: #888;
+      cursor: pointer;
       font-size: 10px;
-      margin-right: 6px;
       text-transform: uppercase;
-      letter-spacing: 1px;
     }
 
-    /* --- GAME CONTAINER --- */
+    .score-container {
+      background: var(--card-bg);
+      padding: 10px 20px;
+      border-radius: 16px;
+      text-align: center;
+      margin-bottom: 20px;
+      min-width: 120px;
+    }
+
     .game-container {
       position: relative;
-      background: #e9e9e9;
+      background: var(--card-bg);
       padding: 12px;
       border-radius: 24px;
       width: 340px;
       height: 340px;
+    }
+
+    .grid-bg {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
       grid-template-rows: repeat(4, 1fr);
       gap: 12px;
-    }
-
-    /* The grid cells (backgrounds behind tiles) */
-    .grid-cell {
-      background: #d4d4d4;
-      border-radius: 12px;
       width: 100%;
       height: 100%;
     }
 
-    /* --- TILES --- */
+    .grid-cell { background: var(--tile-empty); border-radius: 12px; }
+
+    #tile-container {
+      position: absolute;
+      top: 12px;
+      left: 12px;
+      width: 316px; 
+      height: 316px;
+      pointer-events: none;
+    }
+
     .tile {
       position: absolute;
-      width: 69.5px; /* Calculated to fit inside grid with gap */
-      height: 69.5px;
+      width: 70px;
+      height: 70px;
       border-radius: 12px;
       display: flex;
       justify-content: center;
       align-items: center;
       font-size: 24px;
       font-weight: bold;
-      transition: transform 0.15s ease-in-out, background 0.15s;
-      animation: pop 0.2s ease-out;
-      color: #1c1c1c;
       background: #fff;
-      z-index: 10;
+      color: #1c1c1c;
+      /* Smooth Sliding */
+      transition: transform 150ms ease-in-out, background 150ms ease;
     }
 
-    /* Dynamic positioning based on x/y coordinates */
-    /* We handle positions in JS, but this is the base size */
+    .tile-new { animation: pop 200ms ease-out; }
 
-    /* Tile Colors (Minimalist Theme) */
-    .tile-2    { background: #ffffff; }
-    .tile-4    { background: #f0f0f0; }
-    .tile-8    { background: #e0e0e0; }
-    .tile-16   { background: #d0d0d0; }
-    .tile-32   { background: #c0c0c0; }
-    .tile-64   { background: #b0b0b0; color: #fff; }
-    .tile-128  { background: #a0a0a0; color: #fff; }
-    .tile-256  { background: #909090; color: #fff; }
-    .tile-512  { background: #808080; color: #fff; }
-    .tile-1024 { background: #404040; color: #fff; font-size: 20px; }
-    .tile-2048 { background: #ffc700; color: #1c1c1c; box-shadow: 0 0 15px #ffc70080; }
+    /* Tile Colors */
+    .tile-2 { background: #fff; }
+    .tile-4 { background: #f8f8f8; }
+    .tile-8 { background: #f0f0f0; }
+    .tile-16 { background: #e0e0e0; }
+    .tile-32 { background: #d0d0d0; }
+    .tile-64 { background: #c0c0c0; color: #1c1c1c; }
+    .tile-128 { background: #b0b0b0; color: #fff; }
+    .tile-2048 { background: var(--accent); color: #1c1c1c; }
 
     @keyframes pop {
-      0% { transform: scale(0); }
-      80% { transform: scale(1.1); }
-      100% { transform: scale(1); }
+      0% { transform: scale(0) translate(var(--tx), var(--ty)); }
+      100% { transform: scale(1) translate(var(--tx), var(--ty)); }
     }
 
-    /* --- OVERLAY --- */
-    .game-over {
-      position: absolute;
-      inset: 0;
-      background: rgba(242, 242, 242, 0.85);
-      display: none; /* Flex when active */
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      border-radius: 24px;
-      z-index: 50;
-    }
-
-    .game-over h2 {
-      font-size: 32px;
-      margin-bottom: 16px;
-    }
-
-    /* --- CONTROLS --- */
-    .controls {
-      margin-top: 24px;
-      display: flex;
-      gap: 16px;
-    }
-
-    .btn {
-      background: #1c1c1c;
-      color: #f2f2f2;
-      border: none;
-      padding: 12px 24px;
+    .reset-btn {
+      margin-top: 30px;
+      background: transparent;
+      color: var(--text);
+      border: 1px solid var(--text);
+      padding: 10px 24px;
       border-radius: 999px;
       cursor: pointer;
-      font-size: 14px;
-      transition: transform 0.1s, filter 0.2s;
-    }
-
-    .btn:hover {
-      filter: brightness(1.2);
-    }
-
-    .btn:active {
-      transform: scale(0.95);
-    }
-
-    .btn-secondary {
-      background: #e9e9e9;
-      color: #1c1c1c;
+      font-size: 12px;
     }
   </style>
 </head>
-<body>
+<body data-theme="light">
 
   <header>
-    <a href="../../2048.html" class="back-btn">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <path d="M19 12H5M12 19l-7-7 7-7"/>
-      </svg>
-      Back
-    </a>
-    
-    <div class="score-box">
-      <span class="score-label">Score</span>
-      <span id="score">0</span>
-    </div>
+    <a href="../../index.html" class="back-btn">← Back</a>
+    <button class="theme-toggle" id="themeToggle">Dark Mode</button>
   </header>
 
-  <div class="game-container" id="grid-container">
-    <div class="grid-cell"></div> <div class="grid-cell"></div> <div class="grid-cell"></div> <div class="grid-cell"></div>
-    <div class="grid-cell"></div> <div class="grid-cell"></div> <div class="grid-cell"></div> <div class="grid-cell"></div>
-    <div class="grid-cell"></div> <div class="grid-cell"></div> <div class="grid-cell"></div> <div class="grid-cell"></div>
-    <div class="grid-cell"></div> <div class="grid-cell"></div> <div class="grid-cell"></div> <div class="grid-cell"></div>
+  <div class="score-container">
+    <div style="font-size: 10px; opacity: 0.5;">SCORE</div>
+    <div id="score" style="font-size: 24px; font-weight: bold;">0</div>
+  </div>
 
-    <div class="game-over" id="gameOverOverlay">
-      <h2>Game Over</h2>
-      <button class="btn" onclick="resetGame()">Try Again</button>
+  <div class="game-container" id="touch-area">
+    <div class="grid-bg">
+      <div class="grid-cell"></div><div class="grid-cell"></div><div class="grid-cell"></div><div class="grid-cell"></div>
+      <div class="grid-cell"></div><div class="grid-cell"></div><div class="grid-cell"></div><div class="grid-cell"></div>
+      <div class="grid-cell"></div><div class="grid-cell"></div><div class="grid-cell"></div><div class="grid-cell"></div>
+      <div class="grid-cell"></div><div class="grid-cell"></div><div class="grid-cell"></div><div class="grid-cell"></div>
     </div>
-    
     <div id="tile-container"></div>
   </div>
 
-  <div class="controls">
-    <button class="btn btn-secondary" onclick="resetGame()">New Game</button>
-  </div>
+  <button class="reset-btn" onclick="init()">Reset Game</button>
 
   <script>
-    const gridContainer = document.getElementById('grid-container');
     const tileContainer = document.getElementById('tile-container');
     const scoreDisplay = document.getElementById('score');
-    const overlay = document.getElementById('gameOverOverlay');
+    const themeToggle = document.getElementById('themeToggle');
     
-    let grid = [];
+    let grid = []; 
     let score = 0;
-    const size = 4;
+    let nextId = 0;
 
-    // --- GAME LOGIC ---
+    themeToggle.onclick = () => {
+      const isLight = document.body.getAttribute('data-theme') === 'light';
+      document.body.setAttribute('data-theme', isLight ? 'dark' : 'light');
+      themeToggle.textContent = isLight ? 'Light Mode' : 'Dark Mode';
+    };
 
     function init() {
-      grid = Array(size * size).fill(0);
+      grid = Array(16).fill(null).map(() => ({ value: 0, id: null }));
       score = 0;
-      updateScore(0);
-      overlay.style.display = 'none';
+      nextId = 0;
+      scoreDisplay.textContent = 0;
       tileContainer.innerHTML = '';
-      addNewTile();
-      addNewTile();
+      addTile(); addTile();
       draw();
     }
 
-    function addNewTile() {
-      const emptyCells = [];
-      grid.forEach((val, index) => {
-        if (val === 0) emptyCells.push(index);
-      });
-
-      if (emptyCells.length === 0) return;
-
-      const randIndex = emptyCells[Math.floor(Math.random() * emptyCells.length)];
-      grid[randIndex] = Math.random() < 0.9 ? 2 : 4;
+    function addTile() {
+      const empty = grid.map((cell, i) => cell.value === 0 ? i : null).filter(v => v !== null);
+      if (empty.length) {
+        const index = empty[Math.floor(Math.random() * empty.length)];
+        grid[index] = { value: Math.random() < 0.9 ? 2 : 4, id: nextId++, isNew: true };
+      }
     }
 
-    function updateScore(add) {
-      score += add;
-      scoreDisplay.textContent = score;
-    }
-
-    // --- DRAWING ---
-    // We render tiles as absolute positioned divs to animate them (simple implementation)
     function draw() {
-      tileContainer.innerHTML = '';
-      
-      grid.forEach((value, index) => {
-        if (value === 0) return;
+      const currentTilesInDOM = Array.from(document.querySelectorAll('.tile'));
+      const activeIds = grid.filter(cell => cell.value > 0).map(cell => cell.id);
 
-        const tile = document.createElement('div');
-        tile.classList.add('tile', `tile-${value}`);
-        tile.textContent = value;
+      // Remove merged tiles
+      currentTilesInDOM.forEach(tile => {
+        if (!activeIds.includes(parseInt(tile.dataset.id))) tile.remove();
+      });
 
-        // Calculate Position
-        const row = Math.floor(index / size);
-        const col = index % size;
-        
-        // 12px padding + (col * (69.5px width + 12px gap))
-        const x = 12 + (col * (69.5 + 12));
-        const y = 12 + (row * (69.5 + 12));
+      grid.forEach((cell, i) => {
+        if (cell.value > 0) {
+          let tileElement = document.querySelector(`.tile[data-id="${cell.id}"]`);
+          
+          const row = Math.floor(i / 4);
+          const col = i % 4;
+          const x = col * (70 + 12);
+          const y = row * (70 + 12);
 
-        tile.style.transform = `translate(${x}px, ${y}px)`;
-        tileContainer.appendChild(tile);
+          if (!tileElement) {
+            // THE FIX: Create the element and set position IMMEDIATELY
+            tileElement = document.createElement('div');
+            tileElement.className = 'tile tile-new';
+            tileElement.dataset.id = cell.id;
+            
+            // Set styles before it even enters the DOM
+            tileElement.style.transform = `translate(${x}px, ${y}px)`;
+            // We use CSS variables to make the pop animation stay at the right spot
+            tileElement.style.setProperty('--tx', `${x}px`);
+            tileElement.style.setProperty('--ty', `${y}px`);
+            
+            tileContainer.appendChild(tileElement);
+          }
+
+          // Update value and sliding position
+          tileElement.textContent = cell.value;
+          tileElement.className = `tile tile-${cell.value} ${cell.isNew ? 'tile-new' : ''}`;
+          tileElement.style.transform = `translate(${x}px, ${y}px)`;
+          
+          cell.isNew = false; 
+        }
       });
     }
-
-    // --- MOVEMENT LOGIC ---
 
     function slide(row) {
-      // 1. Filter out zeros
-      let arr = row.filter(val => val);
-      let missing = size - arr.length;
-      let zeros = Array(missing).fill(0);
-      arr = arr.concat(zeros);
-
-      // 2. Merge
-      for (let i = 0; i < size - 1; i++) {
-        if (arr[i] !== 0 && arr[i] === arr[i + 1]) {
-          arr[i] *= 2;
-          updateScore(arr[i]);
-          arr[i + 1] = 0;
+      let filtered = row.filter(cell => cell.value !== 0);
+      let result = [];
+      for (let i = 0; i < filtered.length; i++) {
+        if (i < filtered.length - 1 && filtered[i].value === filtered[i+1].value) {
+          result.push({ value: filtered[i].value * 2, id: filtered[i].id });
+          score += filtered[i].value * 2;
+          i++; 
+        } else {
+          result.push(filtered[i]);
         }
       }
-
-      // 3. Filter zeros again after merge and pad
-      arr = arr.filter(val => val);
-      missing = size - arr.length;
-      zeros = Array(missing).fill(0);
-      arr = arr.concat(zeros);
-      return arr;
+      while (result.length < 4) result.push({ value: 0, id: null });
+      return result;
     }
 
-    function move(direction) {
-      let moved = false;
-      let newGrid = [...grid];
-
-      if (direction === 'Left' || direction === 'Right') {
-        for (let i = 0; i < size; i++) {
-          let row = [];
-          for (let j = 0; j < size; j++) row.push(grid[i * size + j]);
-          
-          if (direction === 'Right') row.reverse();
-          
-          let newRow = slide(row);
-          
-          if (direction === 'Right') newRow.reverse();
-          
-          for (let j = 0; j < size; j++) {
-            if (newGrid[i * size + j] !== newRow[j]) moved = true;
-            newGrid[i * size + j] = newRow[j];
-          }
+    function move(dir) {
+      let oldGrid = JSON.stringify(grid);
+      for (let i = 0; i < 4; i++) {
+        let row = [];
+        for (let j = 0; j < 4; j++) {
+          if (dir === 'Left' || dir === 'Right') row.push(grid[i * 4 + j]);
+          else row.push(grid[j * 4 + i]);
         }
-      } else if (direction === 'Up' || direction === 'Down') {
-        for (let j = 0; j < size; j++) {
-          let col = [];
-          for (let i = 0; i < size; i++) col.push(grid[i * size + j]);
-          
-          if (direction === 'Down') col.reverse();
-          
-          let newCol = slide(col);
-          
-          if (direction === 'Down') newCol.reverse();
-          
-          for (let i = 0; i < size; i++) {
-            if (newGrid[i * size + j] !== newCol[i]) moved = true;
-            newGrid[i * size + j] = newCol[i];
-          }
+        if (dir === 'Right' || dir === 'Down') row.reverse();
+        let newRow = slide(row);
+        if (dir === 'Right' || dir === 'Down') newRow.reverse();
+        for (let j = 0; j < 4; j++) {
+          if (dir === 'Left' || dir === 'Right') grid[i * 4 + j] = newRow[j];
+          else grid[j * 4 + i] = newRow[j];
         }
       }
-
-      if (moved) {
-        grid = newGrid;
-        addNewTile();
+      if (oldGrid !== JSON.stringify(grid)) {
+        addTile();
         draw();
-        checkGameOver();
+        scoreDisplay.textContent = score;
       }
     }
 
-    function checkGameOver() {
-      if (grid.includes(0)) return;
-
-      // Check for possible merges
-      for (let i = 0; i < size; i++) {
-        for (let j = 0; j < size; j++) {
-          let current = grid[i * size + j];
-          // Check Right
-          if (j < size - 1 && current === grid[i * size + (j + 1)]) return;
-          // Check Down
-          if (i < size - 1 && current === grid[(i + 1) * size + j]) return;
-        }
-      }
-
-      overlay.style.display = 'flex';
-    }
-
-    function resetGame() {
-      init();
-    }
-
-    // --- INPUTS ---
-    document.addEventListener('keydown', (e) => {
-      if (['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(e.key)) {
-        e.preventDefault(); // Stop page scrolling
-        move(e.key.replace('Arrow', ''));
-      }
+    // Controls
+    window.addEventListener('keydown', e => {
+      if (e.key.includes('Arrow')) { e.preventDefault(); move(e.key.replace('Arrow', '')); }
     });
 
-    // Touch support (Swipe)
-    let touchStartX = 0;
-    let touchStartY = 0;
-
-    document.addEventListener('touchstart', (e) => {
-      touchStartX = e.touches[0].clientX;
-      touchStartY = e.touches[0].clientY;
-    }, {passive: false});
-
-    document.addEventListener('touchend', (e) => {
-      if (!touchStartX || !touchStartY) return;
-
-      let touchEndX = e.changedTouches[0].clientX;
-      let touchEndY = e.changedTouches[0].clientY;
-
-      let diffX = touchStartX - touchEndX;
-      let diffY = touchStartY - touchEndY;
-
-      // Determine stronger axis
-      if (Math.abs(diffX) > Math.abs(diffY)) {
-        if (Math.abs(diffX) > 30) { // Threshold
-          move(diffX > 0 ? 'Left' : 'Right');
-        }
+    // Mobile Swipe
+    let startX, startY;
+    document.addEventListener('touchstart', e => { startX = e.touches[0].clientX; startY = e.touches[0].clientY; }, false);
+    document.addEventListener('touchend', e => {
+      if (!startX || !startY) return;
+      let dx = startX - e.changedTouches[0].clientX;
+      let dy = startY - e.changedTouches[0].clientY;
+      if (Math.abs(dx) > Math.abs(dy)) {
+        if (Math.abs(dx) > 30) move(dx > 0 ? 'Left' : 'Right');
       } else {
-        if (Math.abs(diffY) > 30) {
-          move(diffY > 0 ? 'Up' : 'Down');
-        }
+        if (Math.abs(dy) > 30) move(dy > 0 ? 'Up' : 'Down');
       }
-      
-      touchStartX = 0;
-      touchStartY = 0;
-    }, {passive: false});
+      startX = startY = null;
+    }, false);
 
-    // Start
     init();
-
   </script>
 </body>
 </html>
-
